@@ -1,0 +1,10 @@
+
+.wrap {
+  display: flex;
+  align-items: center;
+}
+
+.cover {
+  width: 30vw;
+  height: 42vw;
+} 

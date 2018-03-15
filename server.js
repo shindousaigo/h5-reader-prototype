@@ -14,6 +14,10 @@ new WebpackDevServer(webpack(config), {
   if (err) {
     return console.log(err)
   }
-
-  console.log('Listening on http://localhost:3000')
 })
+
+
+var expressServer = require('./express')
+expressServer.setup() 
+
+

@@ -19,14 +19,13 @@ export default class Reader extends React.Component {
     }
     this.tappableProps = {
       component: 'div',
+      moveThreshold: 30,
       onTap: (event) => {
         event.persist()
         switch (event.target.dataset.option) {
           case 'prev':
-            console.log('prev')
             break;
           case 'next':
-            console.log('next')
             break;
           case 'bigger':
             if (fontSize >= 21) {
@@ -67,17 +66,37 @@ export default class Reader extends React.Component {
         }
       }
     }
+    this.state = {
+      toggle: {
+        uTab: {
+          display: 'none'
+        }
+      }
 
+    }
 
     this.promise = new Promise((resolve, reject) => {
-      fetchJsonp("https://jsonp.afeld.me/?callback=myCallback&url=http://chapterup.zhuishushenqi.com/chapter/http://vip.zhuishushenqi.com/chapter/5817f1161bb2ca566b0a5973?cv=1481275033588")
+      fetch("http://127.0.0.1:3001/?url=" + encodeURIComponent('http://chapterup.zhuishushenqi.com/chapter/http://vip.zhuishushenqi.com/chapter/5817f1161bb2ca566b0a5973?cv=1481275033588'))
         .then((response) => {
-          return response.json()
-        }).then((json) => {
-          this.promise.chapter = json.chapter
-          resolve()
+          response.json().then(json => {
+            json = JSON.parse(json)
+            this.promise.chapter = json.chapter
+            resolve()
+          })
         }).catch((ex) => { });
     })
+  }
+
+  ReaderBaseFrame(chapter) {
+    var tmp = chapter.cpContent.replace(/\n/g, '#$%')
+    tmp = tmp.split('#$%')
+    var html = '<h4>' + chapter.title + '</h4>';
+    tmp.forEach(item => {
+      html += '<p>' + item.trim() + '</p>'
+    })
+    this.Dom.read_content.innerHTML = html;
+    this.state.toggle.uTab = null
+    this.setState(this.state)
   }
 
   getChapter() {
@@ -105,11 +124,10 @@ export default class Reader extends React.Component {
   async componentDidMount() {
     this.getDomElements()
     await this.getChapter();
-    console.log(this.promise.chapter);
 
     var readerModel;
     var readerUI;
-    var fontSize = parseInt(Util.StorageGetter('font-size')) || 50;
+    var fontSize = parseInt(Util.StorageGetter('font-size')) || '5vw';
     var bgColor = Util.StorageGetter('bgColor');
     var color = Util.StorageGetter('color');
     function main() {
@@ -137,9 +155,8 @@ export default class Reader extends React.Component {
       }
 
       readerModel = ReaderModel();
-      readerUI = ReaderBaseFrame(this.Dom.read_content);
+      readerUI = this.ReaderBaseFrame(this.promise.chapter);
       // readerModel.init().then(function (data) { });
-      readerUI(this.promise.chapter);
       // EventHanlder();
     }
     function ReaderModel() {
@@ -242,26 +259,7 @@ export default class Reader extends React.Component {
         // nextChapter: nextChapter
       }
     }
-    function ReaderBaseFrame(container) {
-      // 渲染基本的UI结构
-      //把获取的json对象渲染到html中,return html
-      function parseChapterData(chapter) {
-        // var jsonObj = JSON.parse(json);
-        var tmp = chapter.cpContent.replace(/\n/g, '#$%')
-        tmp = tmp.split('#$%')
-        var html = '<h4>' + chapter.titel + '</h4>';
-        // for (var i = 0; i < jsonObj.p.length; i++) {
-        //   html += '<p>' + jsonObj.p[i] + '</p>'
-        // }
-        tmp.forEach(item => {
-          html += '<p>' + item.trim() + '</p>'
-        })
-        return html;
-      }
-      return function (data) {
-        container.innerHTML = parseChapterData(data);
-      };
-    }
+
     function EventHanlder() {
       // Dom.color_box.click(function () {
       //   bgColor = $(this).data('color');
@@ -312,28 +310,37 @@ export default class Reader extends React.Component {
       //     readerUI(data);
       //   });
       // });
-      // Win.scroll(function () {
-      //   Dom.top_nav.hide();
-      //   Dom.bottom_nav.hide();
-      //   Dom.icon_font.removeClass('icon-font-current');
-      //   Dom.nav_pannel.hide();
-      // });
     }
     main.call(this);
-
+    document.onscroll = () => {
+      if (this.Dom.top_nav.style.display != 'none') {
+        this.Dom.top_nav.hide();
+        this.Dom.bottom_nav.hide();
+        this.Dom.icon_font.classList.remove('icon-font-current');
+        this.Dom.nav_pannel.hide();
+      }
+    }
   }
 
   render() {
     return <div>
+      {/* 顶部导航栏 */}
       <div className="top-nav" style={{ display: 'none' }}>
-        <div className="icon-back"></div>
-        <div className="nav-title">返回书架</div>
+        <div className="top-nav-box">
+          <div className="icon-back"></div>
+          <div className="nav-title">返回书架</div>
+        </div>
       </div>
+      {/* 顶部导航栏 */}
+      {/* 文本内容 */}
       <div className="m-read-content"></div>
-      <ul className="u-tab">
+      {/* 文本内容 */}
+      {/* 章节切换 */}
+      <ul className="u-tab" style={this.state.toggle.uTab}>
         <Tappable data-option="prev" {...this.tappableProps}>上一章</Tappable>
         <Tappable data-option="next" {...this.tappableProps}>下一章</Tappable>
       </ul>
+      {/* 章节切换 */}
       <div className="nav-pannel-bg nav_pannel" style={{ display: 'none' }}></div>
       <div className="nav-pannel nav_pannel" style={{ display: 'none' }}>
         <div className="nav-pannel-item">
@@ -343,8 +350,6 @@ export default class Reader extends React.Component {
         </div>
         <div className="nav-pannel-item">
           <span>背景</span>
-
-
           <div className="color-box" data-color="#f7eee5">
             <div className="color"></div>
           </div>
@@ -366,21 +371,17 @@ export default class Reader extends React.Component {
         </div>
       </div>
       <div className="bottom-nav" style={{ display: 'none' }}>
-        <div className="bottom-nav-item" id="menu_button">
-          <div className="item-warp">
-            <div className="icon-menu"></div>
+        <div className="bottom-nav-box">
+          <div className="bottom-nav-item" id="menu_button">
+            <div className="icon icon-menu"></div>
             <div className="icon-text">目录</div>
           </div>
-        </div>
-        <Tappable className="bottom-nav-item" id="font_button" data-option="fontbutton" {...this.tappableProps}>
-          <div className="item-warp">
-            <div className="icon-font"></div>
+          <Tappable className="bottom-nav-item" id="font_button" data-option="fontbutton" {...this.tappableProps}>
+            <div className="icon icon-font"></div>
             <div className="icon-text">字体</div>
-          </div>
-        </Tappable>
-        <div className="bottom-nav-item" id="night_button">
-          <div className="item-warp">
-            <div className="icon-night"></div>
+          </Tappable>
+          <div className="bottom-nav-item" id="night_button">
+            <div className="icon icon-night"></div>
             <div className="icon-text">夜间</div>
           </div>
         </div>

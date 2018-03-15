@@ -6,6 +6,8 @@ import React from 'react'
 import { render } from 'react-dom'
 import { AppContainer } from 'react-hot-loader'
 import Reader from './components/reader'
+import Table from './components/table'
+import Service from './service'
 
 const renderApp = (NextApp) => {
   render(
@@ -16,11 +18,14 @@ const renderApp = (NextApp) => {
   )
 }
 
-renderApp(Reader)
+renderApp(Table)
 
 if (module.hot) {
-  module.hot.accept('./app', () => {
-    // const NextApp = require('./app').default
-    renderApp(Reader)
+  module.hot.accept('./', () => {
+    renderApp(Table)
   })
 }
+
+
+
+
