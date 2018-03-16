@@ -38,9 +38,7 @@ export default class Service {
    */
   getCategory() {
     var url = encodeURIComponent(this.apiUrl + '/cats/lv2/statistics')
-    this.request().then(json => {
-      console.log('获取所有分类', json)
-    })
+    return this.request(url)
   }
 
   /**
@@ -71,9 +69,7 @@ export default class Service {
    */
   getBookInfo(bookId) {
     var url = encodeURIComponent(this.apiUrl + '/book/' + bookId)
-    this.request(url).then(json => {
-      console.log('获取小说信息', json)
-    })
+    return this.request(url)
   }
 
   /**
@@ -81,12 +77,7 @@ export default class Service {
    */
   getBookYuan(bookId) {
     var url = encodeURIComponent(this.apiUrl + '/btoc?view=summary&book=' + bookId)
-    this.request(url).then(json => {
-      console.log('获取小说正版源', json)
-
-      var bookId = json[0]._id
-      this.getBookChapter(bookId)
-    })
+    return this.request(url)
   }
 
   /**
@@ -94,11 +85,7 @@ export default class Service {
    */
   getBookChapter(bookId) {
     var url = encodeURIComponent(this.apiUrl + '/atoc/' + bookId + '?view=chapters')
-    this.request(url).then(json => {
-      console.log('获取小说章节', json)
-
-      this.getContentByChapter(json.chapters[0].link)
-    })
+    return this.request(url)
   }
 
   /**
@@ -106,9 +93,7 @@ export default class Service {
    */
   getContentByChapter(chapterLink) {
     var url = encodeURIComponent(this.contetnUrl + chapterLink)
-    this.request(url).then(json => {
-      console.log('获取章节内容', json)
-    })
+    return this.request(url)
   }
 
 } 

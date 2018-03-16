@@ -1,22 +1,21 @@
 'use strict'
 
 import './reader.css'
-
 import React from 'react'
-import fetchJsonp from 'fetch-jsonp'
 import Tappable from 'react-tappable/lib/Tappable'
-import Util from './util'
+import Data from 'components/data'
+import Service from 'src/service'
 
 export default class Reader extends React.Component {
 
-  constructor() {
+  constructor({ match }) {
     super()
-    HTMLElement.prototype.show = function () {
-      this.style.display = 'block'
-    }
-    HTMLElement.prototype.hide = function () {
-      this.style.display = 'none'
-    }
+    // HTMLElement.prototype.show = function () {
+    //   this.style.display = 'block'
+    // }
+    // HTMLElement.prototype.hide = function () {
+    //   this.style.display = 'none'
+    // }
     this.tappableProps = {
       component: 'div',
       moveThreshold: 30,
@@ -32,7 +31,7 @@ export default class Reader extends React.Component {
               return;
             }
             fontSize++;
-            Util.StorageSetter('font-size', fontSize);
+            // Util.StorageSetter('font-size', fontSize);
             this.Dom.read_content.style.fontSize = fontSize;
             break;
           case 'smaller':
@@ -40,19 +39,21 @@ export default class Reader extends React.Component {
               return;
             }
             fontSize--;
-            Util.StorageSetter('font-size', fontSize);
+            // Util.StorageSetter('font-size', fontSize);
             this.Dom.read_content.style.fontSize = fontSize;
             break;
           case 'actionmid':
-            if (this.Dom.top_nav.style.display == 'none') {
-              this.Dom.top_nav.show();
-              this.Dom.bottom_nav.show();
+            if (!this.state.isMenu) {
+              this.state.hide.topNav = false
+              this.state.hide.botNav = false
             } else {
-              this.Dom.top_nav.hide();
-              this.Dom.bottom_nav.hide();
-              this.Dom.icon_font.classList.remove('icon-font-current');
-              this.Dom.nav_pannel.hide();
+              this.state.hide.topNav = true
+              this.state.hide.botNav = true
+              // this.Dom.icon_font.classList.remove('icon-font-current');
+              // this.Dom.nav_pannel.hide();
             }
+            this.state.isMenu = !this.state.isMenu
+            this.setState(this.state)
             break;
           case 'fontbutton':
             if (this.Dom.nav_pannel.style.display == 'none') {
@@ -67,101 +68,95 @@ export default class Reader extends React.Component {
       }
     }
     this.state = {
-      toggle: {
-        uTab: {
-          display: 'none'
-        }
-      }
-
+      hide: {
+        uTab: true,
+        topNav: true,
+        botNav: true,
+      },
+      chapterData: null,
+      colorCfg: {
+        list: [
+          '#f7eee5',
+          '#e9dfc7',
+          '#a4a4a4',
+          '#cdefce',
+          '#283548',
+          '#0f1410'
+        ],
+        defaultColor: 1,
+      },
+      isMenu: false
     }
 
-    this.promise = new Promise((resolve, reject) => {
-      fetch("http://127.0.0.1:3001/?url=" + encodeURIComponent('http://chapterup.zhuishushenqi.com/chapter/http://vip.zhuishushenqi.com/chapter/5817f1161bb2ca566b0a5973?cv=1481275033588'))
-        .then((response) => {
-          response.json().then(json => {
-            json = JSON.parse(json)
-            this.promise.chapter = json.chapter
-            resolve()
-          })
-        }).catch((ex) => { });
+    var chapterInfo = JSON.parse(Data.instance.getItem(match.params.bookId)).chapters[0]
+    this.getChapterData(chapterInfo)
+  }
+
+  getChapterData(chapterInfo) {
+    Service.instance.getContentByChapter(chapterInfo.link).then(data => {
+      data.chapter.cpContent = data.chapter.cpContent.split(/\n/g)
+      this.state.chapterData = data.chapter
+      this.state.hide.uTab = false
+      this.setState(this.state)
     })
   }
 
-  ReaderBaseFrame(chapter) {
-    var tmp = chapter.cpContent.replace(/\n/g, '#$%')
-    tmp = tmp.split('#$%')
-    var html = '<h4>' + chapter.title + '</h4>';
-    tmp.forEach(item => {
-      html += '<p>' + item.trim() + '</p>'
-    })
-    this.Dom.read_content.innerHTML = html;
-    this.state.toggle.uTab = null
-    this.setState(this.state)
-  }
-
-  getChapter() {
-    if (this.promise.chapter) {
-      return new Promise((resolve, reject) => {
-        resolve()
-      })
+  mReadContent() {
+    if (this.state.chapterData) {
+      return <div className="m-read-content" dangerouslySetInnerHTML={{
+        __html: this.state.chapterData.cpContent.map((item, i) => {
+          if (i) {
+            return `<p>${item.trim()}</p>`
+          } else {
+            return `<h4>${this.state.chapterData.title}</h4><p>${item.trim()}</p>`
+          }
+        }).join('')
+      }}></div>
     } else {
-      return this.promise
+      return null
     }
   }
 
-  getDomElements() {
-    this.Dom = {
-      read_content: document.querySelector('.m-read-content'),
-      top_nav: document.querySelector('.top-nav'),
-      bottom_nav: document.querySelector('.bottom-nav'),
-      nav_pannel: document.querySelector('.nav_pannel'),
-      icon_font: document.querySelector('.icon-font'),
-      color_box: document.querySelectorAll('.color-box'),
-      icon_night: document.querySelector('.icon-night'),
-    }
-  }
-
-  async componentDidMount() {
-    this.getDomElements()
-    await this.getChapter();
-
+  componentDidMount() {
     var readerModel;
     var readerUI;
-    var fontSize = parseInt(Util.StorageGetter('font-size')) || '5vw';
-    var bgColor = Util.StorageGetter('bgColor');
-    var color = Util.StorageGetter('color');
+    var fontSize
+    var bgColor
+    var color
+    // var fontSize = '5vw' // parseInt(Util.StorageGetter('font-size')) || '5vw';
+    // var bgColor = Util.StorageGetter('bgColor');
+    // var color = Util.StorageGetter('color');
     function main() {
-      document.body.style.backgroundColor = bgColor
-      this.Dom.read_content.style.fontSize = fontSize + 'px'
-      this.Dom.read_content.style.color = color
+      // document.body.style.backgroundColor = bgColor
+      // this.Dom.read_content.style.fontSize = fontSize + 'px'
+      // this.Dom.read_content.style.color = color
 
-      var className = 'color-box-current'
-      this.Dom.color_box.forEach(item => {
-        var isContain = item.classList.contains(className)
-        if (item.dataset.color == bgColor) {
-          !isContain && item.classList.add(className)
-        } else {
-          isContain && item.classList.remove(className)
-        }
-      })
+      // var className = 'color-box-current'
+      // this.Dom.color_box.forEach(item => {
+      //   var isContain = item.classList.contains(className)
+      //   if (item.dataset.color == bgColor) {
+      //     !isContain && item.classList.add(className)
+      //   } else {
+      //     isContain && item.classList.remove(className)
+      //   }
+      // })
 
-      className = 'icon-night-current'
-      if (bgColor == '#0f1410') {
-        this.Dom.icon_night.classList.add(className)
-        this.Dom.icon_night.nextSibling.innerText = '白天'
-      } else {
-        this.Dom.icon_night.classList.remove(className);
-        this.Dom.icon_night.nextSibling.innerText = '夜间';
-      }
+      // className = 'icon-night-current'
+      // if (bgColor == '#0f1410') {
+      //   this.Dom.icon_night.classList.add(className)
+      //   this.Dom.icon_night.nextSibling.innerText = '白天'
+      // } else {
+      //   this.Dom.icon_night.classList.remove(className);
+      //   this.Dom.icon_night.nextSibling.innerText = '夜间';
+      // }
 
       readerModel = ReaderModel();
-      readerUI = this.ReaderBaseFrame(this.promise.chapter);
       // readerModel.init().then(function (data) { });
       // EventHanlder();
     }
     function ReaderModel() {
       // 实现和阅读器相关的数据交互方法
-      var Chapter_id = Util.StorageGetter('Chapter_id');
+      // var Chapter_id = Util.StorageGetter('Chapter_id');
       var Chapter_count;
       //初始化
       var init = function () {
@@ -313,19 +308,22 @@ export default class Reader extends React.Component {
     }
     main.call(this);
     document.onscroll = () => {
-      if (this.Dom.top_nav.style.display != 'none') {
-        this.Dom.top_nav.hide();
-        this.Dom.bottom_nav.hide();
-        this.Dom.icon_font.classList.remove('icon-font-current');
-        this.Dom.nav_pannel.hide();
-      }
+
+      // if (this.Dom.top_nav.style.display != 'none') {
+      //   this.Dom.top_nav.hide();
+      //   this.Dom.bottom_nav.hide();
+      //   this.Dom.icon_font.classList.remove('icon-font-current');
+      //   this.Dom.nav_pannel.hide();
+      // }
     }
   }
+
+  // componentDidUpdate(prevProps, prevState) { }
 
   render() {
     return <div>
       {/* 顶部导航栏 */}
-      <div className="top-nav" style={{ display: 'none' }}>
+      <div className={this.state.hide.topNav ? 'top-nav hide' : 'top-nav'}>
         <div className="top-nav-box">
           <div className="icon-back"></div>
           <div className="nav-title">返回书架</div>
@@ -333,10 +331,10 @@ export default class Reader extends React.Component {
       </div>
       {/* 顶部导航栏 */}
       {/* 文本内容 */}
-      <div className="m-read-content"></div>
+      {this.mReadContent()}
       {/* 文本内容 */}
       {/* 章节切换 */}
-      <ul className="u-tab" style={this.state.toggle.uTab}>
+      <ul className={this.state.hide.uTab ? 'u-tab hide' : 'u-tab'}>
         <Tappable data-option="prev" {...this.tappableProps}>上一章</Tappable>
         <Tappable data-option="next" {...this.tappableProps}>下一章</Tappable>
       </ul>
@@ -350,7 +348,7 @@ export default class Reader extends React.Component {
         </div>
         <div className="nav-pannel-item">
           <span>背景</span>
-          <div className="color-box" data-color="#f7eee5">
+          {/* <div className="color-box" data-color="#f7eee5">
             <div className="color"></div>
           </div>
           <div className="color-box" id="font_normal" data-color="#e9dfc7">
@@ -367,10 +365,16 @@ export default class Reader extends React.Component {
           </div>
           <div className="color-box" id="font_night" data-color="#0f1410" data-font="#4e534f">
             <div className="color"></div>
-          </div>
+          </div> */}
+          {this.state.colorCfg.list.map((item, i) => {
+            var className = i === this.state.colorCfg.defaultColor ? 'color-box color-box-current' : 'color-box'
+            return <div className={className} data-color={item} key={item}>
+              <div className="color"></div>
+            </div>
+          })}
         </div>
       </div>
-      <div className="bottom-nav" style={{ display: 'none' }}>
+      <div className={this.state.hide.botNav ? 'bottom-nav hide' : 'bottom-nav'}>
         <div className="bottom-nav-box">
           <div className="bottom-nav-item" id="menu_button">
             <div className="icon icon-menu"></div>

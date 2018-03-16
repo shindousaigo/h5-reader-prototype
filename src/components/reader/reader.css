@@ -1,3 +1,7 @@
+.hide {
+  display: none !important;
+}
+
 body {
   width: 100%;
   background-color: #e9dfc7;
