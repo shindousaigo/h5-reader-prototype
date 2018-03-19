@@ -1,6 +1,7 @@
 'use strict'
 
 import 'reset.css'
+import './css/style.css'
 
 import React from 'react'
 import { render } from 'react-dom'
@@ -8,6 +9,10 @@ import { render } from 'react-dom'
 import Reader from './components/reader'
 import Table from './components/table'
 import { HashRouter, Switch, Route, Redirect } from 'react-router-dom'
+
+window.N = function (arr) {
+  return arr.join(' ')
+}
 
 render(
   <div>

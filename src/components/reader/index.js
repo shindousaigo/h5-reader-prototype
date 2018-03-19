@@ -8,7 +8,7 @@ import Service from 'src/service'
 
 export default class Reader extends React.Component {
 
-  constructor({ match }) {
+  constructor({ match, history }) {
     super()
     // HTMLElement.prototype.show = function () {
     //   this.style.display = 'block'
@@ -21,7 +21,7 @@ export default class Reader extends React.Component {
       moveThreshold: 30,
       onTap: (event) => {
         event.persist()
-        switch (event.target.dataset.option) {
+        switch (this.getOption(event.target)) {
           case 'prev':
             break;
           case 'next':
@@ -44,34 +44,40 @@ export default class Reader extends React.Component {
             break;
           case 'actionmid':
             if (!this.state.isMenu) {
-              this.state.hide.topNav = false
-              this.state.hide.botNav = false
+              this.state.class.topNav = []
+              this.state.class.botNav = []
             } else {
-              this.state.hide.topNav = true
-              this.state.hide.botNav = true
-              // this.Dom.icon_font.classList.remove('icon-font-current');
-              // this.Dom.nav_pannel.hide();
+              this.state.class.topNav = ['hide']
+              this.state.class.botNav = ['hide']
+              this.state.class.iconFont = []
+              this.state.class.navPannel = ['hide']
             }
             this.state.isMenu = !this.state.isMenu
             this.setState(this.state)
             break;
           case 'fontbutton':
-            if (this.Dom.nav_pannel.style.display == 'none') {
-              Dom.icon_font.classList.add('icon-font-current')
-              Dom.nav_pannel.show();
+            if (this.state.class.navPannel.length) {
+              this.state.class.iconFont = ['icon-font-current']
+              this.state.class.navPannel = []
             } else {
-              Dom.icon_font.classList.remove('icon-font-current')
-              Dom.nav_pannel.hide();
+              this.state.class.iconFont = []
+              this.state.class.navPannel = ['hide']
             }
+            this.setState(this.state);
+            break;
+          case 'back':
+            history.goBack()
             break;
         }
       }
     }
     this.state = {
-      hide: {
-        uTab: true,
-        topNav: true,
-        botNav: true,
+      class: {
+        iconFont: [],
+        uTab: ['hide'],
+        navPannel: ['hide'],
+        topNav: ['hide'],
+        botNav: ['hide']
       },
       chapterData: null,
       colorCfg: {
@@ -96,9 +102,17 @@ export default class Reader extends React.Component {
     Service.instance.getContentByChapter(chapterInfo.link).then(data => {
       data.chapter.cpContent = data.chapter.cpContent.split(/\n/g)
       this.state.chapterData = data.chapter
-      this.state.hide.uTab = false
+      this.state.class.uTab = []
       this.setState(this.state)
     })
+  }
+
+  getOption(target) {
+    if(target.dataset.hasOwnProperty('option')) {
+      return target.dataset.option
+    } else {
+      return this.getOption(target.parentElement)
+    }
   }
 
   mReadContent() {
@@ -321,11 +335,11 @@ export default class Reader extends React.Component {
   // componentDidUpdate(prevProps, prevState) { }
 
   render() {
-    return <div>
+    return <div className="readerBg">
       {/* 顶部导航栏 */}
-      <div className={this.state.hide.topNav ? 'top-nav hide' : 'top-nav'}>
+      <div className={N(['top-nav'].concat(this.state.class.topNav))}>
         <div className="top-nav-box">
-          <div className="icon-back"></div>
+          <Tappable className="icon-back" data-option="back" {...this.tappableProps} />
           <div className="nav-title">返回书架</div>
         </div>
       </div>
@@ -334,13 +348,13 @@ export default class Reader extends React.Component {
       {this.mReadContent()}
       {/* 文本内容 */}
       {/* 章节切换 */}
-      <ul className={this.state.hide.uTab ? 'u-tab hide' : 'u-tab'}>
+      <ul className={N(['u-tab'].concat(this.state.class.uTab))}>
         <Tappable data-option="prev" {...this.tappableProps}>上一章</Tappable>
         <Tappable data-option="next" {...this.tappableProps}>下一章</Tappable>
       </ul>
       {/* 章节切换 */}
-      <div className="nav-pannel-bg nav_pannel" style={{ display: 'none' }}></div>
-      <div className="nav-pannel nav_pannel" style={{ display: 'none' }}>
+      <div className={N(['nav-pannel-bg', 'nav_pannel'].concat(this.state.class.navPannel))}></div>
+      <div className={N(['nav-pannel', 'nav_pannel'].concat(this.state.class.navPannel))}>
         <div className="nav-pannel-item">
           <span>字号</span>
           <Tappable data-option="bigger" {...this.tappableProps}>大</Tappable>
@@ -374,14 +388,14 @@ export default class Reader extends React.Component {
           })}
         </div>
       </div>
-      <div className={this.state.hide.botNav ? 'bottom-nav hide' : 'bottom-nav'}>
+      <div className={N(['bottom-nav'].concat(this.state.class.botNav))}>
         <div className="bottom-nav-box">
           <div className="bottom-nav-item" id="menu_button">
             <div className="icon icon-menu"></div>
             <div className="icon-text">目录</div>
           </div>
           <Tappable className="bottom-nav-item" id="font_button" data-option="fontbutton" {...this.tappableProps}>
-            <div className="icon icon-font"></div>
+            <div className={N(['icon', 'icon-font'].concat(this.state.class.iconFont))}></div>
             <div className="icon-text">字体</div>
           </Tappable>
           <div className="bottom-nav-item" id="night_button">

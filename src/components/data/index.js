@@ -39,9 +39,9 @@ export default class Data {
     return Service.instance.getBookChapter(bookId)
   }
 
-  async getBook({ dataset }) {
-    var bookId = dataset.id
-    var bookName = dataset.title
+  async getBook({ id, title }) {
+    var bookId = id
+    var bookName = title
 
     if (false && this.hasItem(bookId)) {
       await this.getbook1(bookId).then(bookInfo => {
@@ -68,7 +68,7 @@ export default class Data {
         console.log('getBookChapter', data.chapters)
         chapters = data.chapters
 
-        
+
       })
 
       var bookInfo = {

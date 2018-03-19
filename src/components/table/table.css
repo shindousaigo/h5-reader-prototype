@@ -1,11 +1,96 @@
-
 .wrap {
   display: flex;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
   width: 100vw;
+  height: 100%;
+  background: #fff;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 14vw;
+  margin-bottom: 2vw;
+}
+
+.user {
+  width: 8vw;
+  height: 8vw;
+  background: url(../../img/user-4.svg);
+  background-size: 100% 100%;
+  margin-left: 4vw;
+}
+
+.switch {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 20%;
+}
+
+.switchItem {
+  color: #888;
+  padding: 1vw 0 1vw 0;
+}
+
+.switchItem.on {
+  color: #000;
+  border-bottom: 1px solid #888;
+}
+
+.search {
+  width: 6vw;
+  height: 6vw;
+  background: url(../../img/iconfont-seacher.svg);
+  background-size: 100% 100%;
+  margin-right: 5vw;
+}
+
+.list {
+  align-items: center;
+  float: left;
+  margin: 2vw 0;
+  display: flex;
+  width: 94%;
+  overflow: hidden;
+  box-sizing: border-box;
+  border-bottom: 1px solid #bbb;
+}
+
+.list:last-child {
+  border-bottom: 0;
 }
 
 .cover {
+  display: flex;
+  background: red;
   width: 30vw;
   height: 42vw;
-} 
+  margin-bottom: 4vw;
+  flex-shrink: 0
+}
+
+.nr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.title {
+  font-weight: 700;
+  font-size: 0.96em;
+}
+
+.author {
+  font-size: 0.94em;
+}
+
+.shortIntro {
+  padding-left: 4vw;
+  font-size: 0.9em;
+  margin-bottom: 4vw;
+}
