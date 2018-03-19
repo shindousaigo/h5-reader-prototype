@@ -1,6 +1,4 @@
 
-// import './table.css'
-// !style-loader!css-loader?modules!
 import style from '!style-loader!css-loader?modules!./table.css'
 import React from 'react'
 import Service from 'src/service'
@@ -12,38 +10,35 @@ export default class Table extends React.Component {
   constructor(props) {
     super()
 
+    if (!window.curView) window.curView = 'desk'
+
     this.state = {
       list: [],
       myList: [],
       class: {
-        desk: [style.on],
+        desk: [],
         tableList: []
       },
-      myBooks: null
     }
 
-    setTimeout(() => {
-      this.state.myBooks = [
-        '5a77b07ade809329a670c934',
-        '5a97c96ac85c0e3bef1435bc'
-      ]
-      this.setState(this.state)
-    }, 750);
-
+    this.state.class[window.curView] = [style.on]
 
     this.tappableProps = {
       component: 'div',
+      moveThreshold: 30,
       onTap: (event) => {
         event.persist()
         switch (this.getOption(event.target)) {
           case 'desk':
             this.state.class.desk = [style.on]
             this.state.class.tableList = []
+            window.curView = 'desk'
             this.setState(this.state)
             break;
           case 'list':
             this.state.class.desk = []
             this.state.class.tableList = [style.on]
+            window.curView = 'tableList'
             this.setState(this.state)
             break;
           case 'see':
@@ -93,9 +88,8 @@ export default class Table extends React.Component {
 
   getDomTable() {
     var list
-    if (this.state.class.desk.length) {
+    if (window.curView === 'desk') {
       list = this.state.myList
-
     } else {
       list = this.state.list
     }
@@ -144,7 +138,9 @@ export default class Table extends React.Component {
   render() {
     return <div className={style.wrap} >
       {this.getDomHeader()}
-      {this.getDomTable()}
+      <div className={style.table}>
+        {this.getDomTable()}
+      </div>
     </div>
   }
 }

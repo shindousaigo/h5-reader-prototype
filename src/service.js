@@ -1,6 +1,4 @@
 
-import queryString from 'query-string'
-
 export default class Service {
 
   static ins = null
@@ -15,15 +13,28 @@ export default class Service {
   apiUrl = 'http://api.zhuishushenqi.com'
   staticUrl = 'http://statics.zhuishushenqi.com'
   contetnUrl = 'http://chapterup.zhuishushenqi.com/chapter/'
+  serverUrl = 'http://123.207.243.228/tao/?r=tao/book&url='
+  // serverUrl = '//localhost:3001/?url='
 
-
-
+  queryStringfy(obj) {
+    var h = ''
+    var f = false
+    for (var name in obj) {
+      if (!f) {
+        f = true
+        h += `${name}=${obj[name]}`
+      } else {
+        h += `&${name}=${obj[name]}`
+      }
+    }
+    return h
+  }
 
   request(url, debug = false) {
     return new Promise((resolve, reject) => {
-      fetch("//localhost:3001/?url=" + url)
+      fetch(this.serverUrl + url)
         .then(response => {
-          response.json().then(json => {
+          response.text().then(json => {
             json = JSON.parse(json)
             resolve(json)
           })
@@ -32,6 +43,8 @@ export default class Service {
         })
     })
   }
+
+
 
   /**
    * 获取所有分类
@@ -52,7 +65,7 @@ export default class Service {
     // start: 分页开始页
     // limit: 分页条数
     var url = encodeURIComponent(
-      this.apiUrl + '/book/by-categories?' + queryString.stringify({
+      this.apiUrl + '/book/by-categories?' + this.queryStringfy({
         gender: 'male',
         type: 'hot',
         major: '游戏',

@@ -27,20 +27,20 @@ export default class Reader extends React.Component {
           case 'next':
             break;
           case 'bigger':
-            if (fontSize >= 21) {
+            if (this.state.fontSize > 1.3) {
               return;
             }
-            fontSize++;
-            // Util.StorageSetter('font-size', fontSize);
-            this.Dom.read_content.style.fontSize = fontSize;
+            this.state.fontSize += .05;
+            this.setState(this.state);
+            Data.instance.setItem('fontsize', this.state.fontSize)
             break;
           case 'smaller':
-            if (fontSize <= 14) {
+            if (this.state.fontSize < 0.9) {
               return;
             }
-            fontSize--;
-            // Util.StorageSetter('font-size', fontSize);
-            this.Dom.read_content.style.fontSize = fontSize;
+            this.state.fontSize -= .05;
+            this.setState(this.state);
+            Data.instance.setItem('fontsize', this.state.fontSize)
             break;
           case 'actionmid':
             if (!this.state.isMenu) {
@@ -68,9 +68,27 @@ export default class Reader extends React.Component {
           case 'back':
             history.goBack()
             break;
+          case 'bgcolor':
+            this.state.colorCfg.defaultColor = event.target.dataset.index
+            this.setState(this.state);
+            break;
+          case 'dayNight':
+            if (this.state.dayNight.text === '夜间') {
+              this.state.dayNight.text = '白天'
+              this.state.colorCfg.defaultColor = 5
+              this.state.dayNight.class = ['icon-night-current']
+            } else {
+              this.state.dayNight.text = '夜间'
+              this.state.colorCfg.defaultColor = 1
+              this.state.dayNight.class = ['icon-night']
+            }
+            this.setState(this.state);
+            break;
         }
       }
     }
+
+    var fz = Data.instance.getItem('fontsize') * 1
     this.state = {
       class: {
         iconFont: [],
@@ -89,9 +107,22 @@ export default class Reader extends React.Component {
           '#283548',
           '#0f1410'
         ],
+        fontColor: [
+          '#000',
+          '#000',
+          '#000',
+          '#000',
+          '#7685a2',
+          '#4e534f',
+        ],
         defaultColor: 1,
       },
-      isMenu: false
+      isMenu: false,
+      fontSize: isNaN(fz) ? 1.1 : fz || 1.1,
+      dayNight: {
+        text: '夜间',
+        class: ['icon-night']
+      }
     }
 
     var chapterInfo = JSON.parse(Data.instance.getItem(match.params.bookId)).chapters[0]
@@ -108,7 +139,7 @@ export default class Reader extends React.Component {
   }
 
   getOption(target) {
-    if(target.dataset.hasOwnProperty('option')) {
+    if (target.dataset.hasOwnProperty('option')) {
       return target.dataset.option
     } else {
       return this.getOption(target.parentElement)
@@ -117,7 +148,10 @@ export default class Reader extends React.Component {
 
   mReadContent() {
     if (this.state.chapterData) {
-      return <div className="m-read-content" dangerouslySetInnerHTML={{
+      return <div style={{
+        fontSize: this.state.fontSize + 'em',
+        color: this.state.colorCfg.fontColor[this.state.colorCfg.defaultColor]
+      }} className="m-read-content" dangerouslySetInnerHTML={{
         __html: this.state.chapterData.cpContent.map((item, i) => {
           if (i) {
             return `<p>${item.trim()}</p>`
@@ -134,7 +168,6 @@ export default class Reader extends React.Component {
   componentDidMount() {
     var readerModel;
     var readerUI;
-    var fontSize
     var bgColor
     var color
     // var fontSize = '5vw' // parseInt(Util.StorageGetter('font-size')) || '5vw';
@@ -290,25 +323,6 @@ export default class Reader extends React.Component {
       //     $('.icon-night').next().html('夜间');
       //   }
       // });
-      // $('#night_button').click(function () {
-      //   if ($('.icon-night').next().html() == '夜间') {
-      //     $('.icon-night').addClass('icon-night-current');
-      //     $('.icon-night').next().html('白天');
-      //     $('body').css('background-color', '#0f1410');
-      //     Dom.read_content.css('color', '#4e534f');
-      //     Util.StorageSetter('bgColor', '#0f1410');
-      //     Util.StorageSetter('color', '#4e534f');
-      //     $('#font_night').addClass('color-box-current').siblings().removeClass('color-box-current');
-      //   } else {
-      //     $('.icon-night').removeClass('icon-night-current');
-      //     $('.icon-night').next().html('夜间');
-      //     $('body').css('background-color', '#e9dfc7');
-      //     Dom.read_content.css('color', '#000');
-      //     Util.StorageSetter('bgColor', '#e9dfc7');
-      //     Util.StorageSetter('color', '#000');
-      //     $('#font_normal').addClass('color-box-current').siblings().removeClass('color-box-current');
-      //   }
-      // });
       // $('#prev_chapter').click(function () {
       //   readerModel.prevChapter(function (data) {
       //     readerUI(data);
@@ -335,7 +349,7 @@ export default class Reader extends React.Component {
   // componentDidUpdate(prevProps, prevState) { }
 
   render() {
-    return <div className="readerBg">
+    return <div style={{ background: this.state.colorCfg.list[this.state.colorCfg.defaultColor] }}>
       {/* 顶部导航栏 */}
       <div className={N(['top-nav'].concat(this.state.class.topNav))}>
         <div className="top-nav-box">
@@ -356,34 +370,16 @@ export default class Reader extends React.Component {
       <div className={N(['nav-pannel-bg', 'nav_pannel'].concat(this.state.class.navPannel))}></div>
       <div className={N(['nav-pannel', 'nav_pannel'].concat(this.state.class.navPannel))}>
         <div className="nav-pannel-item">
-          <span>字号</span>
-          <Tappable data-option="bigger" {...this.tappableProps}>大</Tappable>
-          <Tappable data-option="smaller" {...this.tappableProps}>小</Tappable>
+          <div className="item">字号</div>
+          <Tappable className="item" data-option="bigger" {...this.tappableProps}>大</Tappable>
+          <Tappable className="item" data-option="smaller" {...this.tappableProps}>小</Tappable>
         </div>
         <div className="nav-pannel-item">
-          <span>背景</span>
-          {/* <div className="color-box" data-color="#f7eee5">
-            <div className="color"></div>
-          </div>
-          <div className="color-box" id="font_normal" data-color="#e9dfc7">
-            <div className="color"></div>
-          </div>
-          <div className="color-box" data-color="#a4a4a4">
-            <div className="color"></div>
-          </div>
-          <div className="color-box" data-color="#cdefce">
-            <div className="color"></div>
-          </div>
-          <div className="color-box" data-color="#283548" data-font="#7685a2">
-            <div className="color"></div>
-          </div>
-          <div className="color-box" id="font_night" data-color="#0f1410" data-font="#4e534f">
-            <div className="color"></div>
-          </div> */}
+          <div className="item">背景</div>
           {this.state.colorCfg.list.map((item, i) => {
-            var className = i === this.state.colorCfg.defaultColor ? 'color-box color-box-current' : 'color-box'
+            var className = i == this.state.colorCfg.defaultColor ? 'color-box color-box-current' : 'color-box'
             return <div className={className} data-color={item} key={item}>
-              <div className="color"></div>
+              <Tappable data-option="bgcolor" data-index={i} className="color" {...this.tappableProps} style={{ background: item }}></Tappable>
             </div>
           })}
         </div>
@@ -398,10 +394,10 @@ export default class Reader extends React.Component {
             <div className={N(['icon', 'icon-font'].concat(this.state.class.iconFont))}></div>
             <div className="icon-text">字体</div>
           </Tappable>
-          <div className="bottom-nav-item" id="night_button">
-            <div className="icon icon-night"></div>
-            <div className="icon-text">夜间</div>
-          </div>
+          <Tappable data-option="dayNight" className="bottom-nav-item" {...this.tappableProps}>
+            <div className={N(['icon'].concat(this.state.dayNight.class))}></div>
+            <div className="icon-text">{this.state.dayNight.text}</div>
+          </Tappable>
         </div>
       </div>
       <Tappable className="action-mid" data-option="actionmid" {...this.tappableProps}></Tappable>
