@@ -9,17 +9,18 @@ module.exports = {
     var app = express()
     app.use(cors())
     app.get('/', function (req, res, next) {
-      var url = 'http://api.zhuishushenqi.com/book/by-categories?gender=male&type=hot&major=%E6%B8%B8%E6%88%8F&minor=&start=0&limit=20' //req.query.url
-      console.log(url)
+      var url = req.query.url.replace(/[\u4e00-\u9fa5]/g, function (str) {
+        return encodeURIComponent(str)
+      })
+      console.log('URL : ' + url)
       request(url, function (error, response, body) {
         if (error) {
           console.log('error:', error);
         } else {
-          console.log(response.statusCode, body)
           if (response.statusCode === 200) {
             res.send(body);
-
-
+          } else {
+            console.log('statusCode : ' + response.statusCode)
           }
         }
       })

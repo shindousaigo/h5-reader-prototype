@@ -55,7 +55,6 @@ export default class Data {
       var lastChapter
       var chapters
 
-
       await this.getbook2(bookId).then(yuan => {
         yuan = yuan[0]
         console.log('getBookYuan', yuan)
@@ -67,8 +66,6 @@ export default class Data {
       await this.getbook3(yaunId).then(data => {
         console.log('getBookChapter', data.chapters)
         chapters = data.chapters
-
-
       })
 
       var bookInfo = {

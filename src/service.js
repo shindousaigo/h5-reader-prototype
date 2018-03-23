@@ -13,8 +13,8 @@ export default class Service {
   apiUrl = 'http://api.zhuishushenqi.com'
   staticUrl = 'http://statics.zhuishushenqi.com'
   contetnUrl = 'http://chapterup.zhuishushenqi.com/chapter/'
-  serverUrl = 'http://123.207.243.228/tao/?r=tao/book&url='
-  // serverUrl = '//localhost:3001/?url='
+  // serverUrl = 'http://123.207.243.228/tao/?r=tao/book&url='
+  serverUrl = 'http://localhost:3001/?url='
 
   queryStringfy(obj) {
     var h = ''
@@ -30,7 +30,7 @@ export default class Service {
     return h
   }
 
-  request(url, debug = false) {
+  request(url) {
     return new Promise((resolve, reject) => {
       fetch(this.serverUrl + url)
         .then(response => {
