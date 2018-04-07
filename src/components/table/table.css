@@ -68,7 +68,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 14vw;
+  top: 14vw;
+  width: 100%;
+  position: fixed;
+  height: 100vh;
 }
 
 .list:last-child {
@@ -103,4 +106,41 @@
 .shortIntro {
   font-size: 0.9em;
   margin-bottom: 4vw;
+}
+
+.container {
+  display: flex;
+  width: 100%;
+  justify-content: flex-end;
+  overflow: auto;
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  width: 24%;
+  position: fixed;
+  top: 14vw;
+  left: 0;
+}
+
+.sideItem {
+  background: #ccc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 12vw;
+}
+
+.sideItem.on {
+  background: #fff;
+}
+
+.main {
+  width: 76%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
 }

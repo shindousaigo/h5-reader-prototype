@@ -10,15 +10,19 @@ export default class Table extends React.Component {
   constructor(props) {
     super()
 
-    if (!window.curView) window.curView = 'desk'
+    if (!window.curView) window.curView = 'categories'
 
     this.state = {
       list: [],
       myList: [],
       class: {
         desk: [],
-        tableList: []
+        categories: []
       },
+      categories: {
+        default: 0,
+        list: []
+      }
     }
 
     this.state.class[window.curView] = [style.on]
@@ -31,14 +35,21 @@ export default class Table extends React.Component {
         switch (this.getOption(event.target)) {
           case 'desk':
             this.state.class.desk = [style.on]
-            this.state.class.tableList = []
+            this.state.class.categories = []
             window.curView = 'desk'
             this.setState(this.state)
             break;
           case 'list':
+            break;
+          case 'categories':
             this.state.class.desk = []
-            this.state.class.tableList = [style.on]
-            window.curView = 'tableList'
+            this.state.class.categories = [style.on]
+            window.curView = 'categories'
+            this.setState(this.state)
+            break;
+          case 'categoriesItem':
+            this.state.categories.default = event.target.dataset.index * 1
+            this.searchCate(this.state.categories.default)
             this.setState(this.state)
             break;
           case 'see':
@@ -53,14 +64,34 @@ export default class Table extends React.Component {
             })
             break;
         }
-
-
       }
     }
 
-    Service.instance.getListByCategory().then(data => {
-      console.log('getListByCategory', data.books)
-      this.state.list = data.books
+    Service.instance.getCategory().then(data => {
+      console.log('getCategory', data)
+      var map = ['female', 'male', 'picture', 'press']
+      this.state.categories.list = []
+      var i = 0
+      map.forEach(gender => {
+        data[gender].forEach(item => {
+          var major = item.name
+          i++
+          if (i > 7) return
+          this.state.list.push([])
+          this.state.categories.list.push({
+            gender,
+            major
+          })
+        })
+      })
+      this.setState(this.state)
+      this.searchCate(0)
+    })
+  }
+
+  searchCate(i) {
+    Service.instance.getListByCategory(this.state.categories.list[i]).then(data => {
+      this.state.list[i] = data.books
       data.books.forEach(item => {
         if (item._id === '5a77b07ade809329a670c934' || item._id === '5a97c96ac85c0e3bef1435bc') {
           this.state.myList.push(item)
@@ -68,7 +99,6 @@ export default class Table extends React.Component {
       })
       this.setState(this.state)
     })
-
   }
 
   getDomHeader() {
@@ -78,8 +108,8 @@ export default class Table extends React.Component {
         <div data-option="desk" className={N([style.switchItem].concat(this.state.class.desk))}>
           书架
         </div>
-        <div data-option="list" className={N([style.switchItem].concat(this.state.class.tableList))}>
-          列表
+        <div data-option="categories" className={N([style.switchItem].concat(this.state.class.categories))}>
+          分类
         </div>
       </Tappable>
       <div className={style.search}></div>
@@ -87,13 +117,31 @@ export default class Table extends React.Component {
   }
 
   getDomTable() {
-    var list
-    if (window.curView === 'desk') {
-      list = this.state.myList
-    } else {
-      list = this.state.list
+    var list = []
+    switch (window.curView) {
+      case 'desk':
+        list = this.state.myList
+        if (list.length) {
+          return list.map((item, index) => {
+            return <Tappable data-option="see" {...this.tappableProps} className={style.list} data-title={item.title} data-id={item._id} key={item._id}>
+              <img className={style.cover} src={Service.instance.staticUrl + item.cover} />
+              <div className={style.nr}>
+                <div className={style.title}>{item.title}</div>
+                <div className={style.author}>作者：{item.author}</div>
+                <div data-index={index} className={style.shortIntro}>{this.limitCheck(item.shortIntro)}</div>
+              </div>
+            </Tappable>
+          })
+        }
+        break;
+      case 'categories':
+        return this.getCategoriesDome()
+        break;
     }
-    if (list.length) {
+  }
+
+  categoriesMainHandler(list) {
+    if (list && list.length) {
       return list.map((item, index) => {
         return <Tappable data-option="see" {...this.tappableProps} className={style.list} data-title={item.title} data-id={item._id} key={item._id}>
           <img className={style.cover} src={Service.instance.staticUrl + item.cover} />
@@ -105,7 +153,20 @@ export default class Table extends React.Component {
         </Tappable>
       })
     }
+    return ''
+  }
 
+  getCategoriesDome() {
+    return <div className={style.container}>
+      <div className={style.side}>
+        {this.state.categories.list.map((k, i) => {
+          return <Tappable key={i} data-option="categoriesItem" data-index={i} {...this.tappableProps} className={i === this.state.categories.default ? N([style.sideItem].concat([style.on])) : style.sideItem} >{k.major}</Tappable>
+        })}
+      </div>
+      <div className={style.main}>
+        {this.categoriesMainHandler(this.state.list[this.state.categories.default])}
+      </div>
+    </div>
   }
 
   limitCheck(text) {

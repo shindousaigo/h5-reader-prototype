@@ -57,7 +57,7 @@ export default class Service {
   /**
    * 根据分类获取小说列表
    */
-  getListByCategory() {
+  getListByCategory({ gender, major }) {
     // gender: 男生:mael 女生:female 出版:press
     // type: 热门:hot 新书:new 好评:repulation 完结: over 包月: month
     // major: 大类别 从接口1获取
@@ -66,9 +66,9 @@ export default class Service {
     // limit: 分页条数
     var url = encodeURIComponent(
       this.apiUrl + '/book/by-categories?' + this.queryStringfy({
-        gender: 'male',
+        gender: gender,
         type: 'hot',
-        major: '游戏',
+        major: major,
         minor: '',
         start: 0,
         limit: 20
