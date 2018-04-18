@@ -20,7 +20,7 @@ export default class Table extends React.Component {
         categories: []
       },
       categories: {
-        default: 0,
+        default: 6,
         list: []
       }
     }
@@ -85,7 +85,7 @@ export default class Table extends React.Component {
         })
       })
       this.setState(this.state)
-      this.searchCate(0)
+      this.searchCate(this.state.categories.default)
     })
   }
 
@@ -93,7 +93,7 @@ export default class Table extends React.Component {
     Service.instance.getListByCategory(this.state.categories.list[i]).then(data => {
       this.state.list[i] = data.books
       data.books.forEach(item => {
-        if (item._id === '5a77b07ade809329a670c934' || item._id === '5a97c96ac85c0e3bef1435bc') {
+        if (item._id === '594d25e36d4c9a9059341a4a' || item._id === '586f52b9c976277422698271') {
           this.state.myList.push(item)
         }
       })

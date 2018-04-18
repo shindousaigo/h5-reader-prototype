@@ -13,8 +13,8 @@ export default class Service {
   apiUrl = 'http://api.zhuishushenqi.com'
   staticUrl = 'http://statics.zhuishushenqi.com'
   contetnUrl = 'http://chapterup.zhuishushenqi.com/chapter/'
-  // serverUrl = 'http://123.207.243.228/tao/?r=tao/book&url='
-  serverUrl = 'http://localhost:3001/?url='
+  serverUrl = 'http://123.207.243.228/tao/?r=tao/book&url='
+  // serverUrl = 'http://localhost:3001/?url='
 
   queryStringfy(obj) {
     var h = ''
