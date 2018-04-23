@@ -1,4 +1,3 @@
-
 import Service from 'src/service'
 
 export default class Data {
@@ -39,7 +38,10 @@ export default class Data {
     return Service.instance.getBookChapter(bookId)
   }
 
-  async getBook({ id, title }) {
+  async getBook({
+    id,
+    title
+  }) {
     var bookId = id
     var bookName = title
 

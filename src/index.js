@@ -8,6 +8,7 @@ import { render } from 'react-dom'
 // import { AppContainer } from 'react-hot-loader'
 import Reader from './components/reader'
 import Table from './components/table'
+import Loader from "./components/loader";
 import { HashRouter, Switch, Route, Redirect } from 'react-router-dom'
 
 window.N = function (arr) {
@@ -16,6 +17,7 @@ window.N = function (arr) {
 
 render(
   <div>
+    <Loader></Loader>
     <HashRouter>
       <Switch>
         <Route exact path='/table' component={Table} />

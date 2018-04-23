@@ -1,0 +1,12 @@
+.Loader-loading {
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, .5);
+  top: 0;
+  z-index: 2;
+}
+
+.Loader-loading.hide {
+  display: none;
+}

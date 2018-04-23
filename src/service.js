@@ -1,4 +1,3 @@
-
 export default class Service {
 
   static ins = null
@@ -9,7 +8,7 @@ export default class Service {
     return this.ins || new Service
   }
 
-
+  modules = {}
   apiUrl = 'http://api.zhuishushenqi.com'
   staticUrl = 'http://statics.zhuishushenqi.com'
   contetnUrl = 'http://chapterup.zhuishushenqi.com/chapter/'
@@ -31,20 +30,25 @@ export default class Service {
   }
 
   request(url) {
+    var loader = this.modules.Loader
+    loader.setState({
+      isShow: true
+    })
     return new Promise((resolve, reject) => {
       fetch(this.serverUrl + url)
         .then(response => {
           response.text().then(json => {
             json = JSON.parse(json)
             resolve(json)
+            loader.setState({
+              isShow: false
+            })
           })
         }).catch(ex => {
           console.log(ex)
         })
     })
   }
-
-
 
   /**
    * 获取所有分类
@@ -57,7 +61,10 @@ export default class Service {
   /**
    * 根据分类获取小说列表
    */
-  getListByCategory({ gender, major }) {
+  getListByCategory({
+    gender,
+    major
+  }) {
     // gender: 男生:mael 女生:female 出版:press
     // type: 热门:hot 新书:new 好评:repulation 完结: over 包月: month
     // major: 大类别 从接口1获取
@@ -109,4 +116,4 @@ export default class Service {
     return this.request(url)
   }
 
-} 
+}
