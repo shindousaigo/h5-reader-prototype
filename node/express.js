@@ -14,7 +14,7 @@ module.exports = {
         var url = url.replace(/[\u4e00-\u9fa5]/g, function (str) {
           return encodeURIComponent(str)
         })
-        console.log('URL : ' + url)
+        console.log('URL : ' + url, urlaaa)
         request(url, function (error, response, body) {
           if (error) {
             console.log('error:', error);
