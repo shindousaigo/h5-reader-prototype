@@ -1,21 +1,17 @@
 'use strict'
 
-import './reader.css'
+import './reader.scss'
 import React from 'react'
 import Tappable from 'react-tappable/lib/Tappable'
 import Data from 'components/data'
 import Service from 'src/service'
+import { Button } from 'element-react';
+// import IScroll from 'iscroll/build/iscroll-lite.js'
 
 export default class Reader extends React.Component {
 
   constructor({ match, history }) {
     super()
-    // HTMLElement.prototype.show = function () {
-    //   this.style.display = 'block'
-    // }
-    // HTMLElement.prototype.hide = function () {
-    //   this.style.display = 'none'
-    // }
     this.tappableProps = {
       component: 'div',
       moveThreshold: 30,
@@ -23,8 +19,20 @@ export default class Reader extends React.Component {
         event.persist()
         switch (this.getOption(event.target)) {
           case 'prev':
+            if (Service.instance.modules.Reader.curChapter.order !== 1) {
+              this.state.class.botNav = this.state.class.topNav = this.state.class.mulu = ['hide']
+              this.state.isMenu = false
+              Service.instance.modules.Reader.curChapter = Service.instance.modules.Reader.chapters[Service.instance.modules.Reader.curChapter.order - 1]
+              this.getChapterData()
+            }
             break;
           case 'next':
+            if (Service.instance.modules.Reader.curChapter.order !== Service.instance.modules.Reader.chapters.length) {
+              this.state.class.botNav = this.state.class.topNav = this.state.class.mulu = ['hide']
+              this.state.isMenu = false
+              Service.instance.modules.Reader.curChapter = Service.instance.modules.Reader.chapters[Service.instance.modules.Reader.curChapter.order + 1]
+              this.getChapterData()
+            }
             break;
           case 'bigger':
             if (this.state.fontSize > 1.3) {
@@ -47,10 +55,8 @@ export default class Reader extends React.Component {
               this.state.class.topNav = []
               this.state.class.botNav = []
             } else {
-              this.state.class.topNav = ['hide']
-              this.state.class.botNav = ['hide']
+              this.state.class.mulu = this.state.class.navPannel = this.state.class.botNav = this.state.class.topNav = ['hide']
               this.state.class.iconFont = []
-              this.state.class.navPannel = ['hide']
             }
             this.state.isMenu = !this.state.isMenu
             this.setState(this.state)
@@ -84,6 +90,21 @@ export default class Reader extends React.Component {
             }
             this.setState(this.state);
             break;
+          case 'menubutton':
+            if (this.state.class.mulu.length) {
+              this.state.class.mulu = []
+              this.refs.mulu.scrollTo = document.querySelector(`.mulu div[data-index="${Service.instance.modules.Reader.curChapter.order - 1}"]`).offsetTop - this.refs.mulu.clientHeight * .5
+            } else {
+              this.state.class.mulu = ['hide']
+            }
+            this.setState(this.state);
+            break;
+          case 'muluitem':
+            this.state.class.botNav = this.state.class.topNav = this.state.class.mulu = ['hide']
+            this.state.isMenu = false
+            Service.instance.modules.Reader.curChapter = Service.instance.modules.Reader.chapters[event.target.dataset.index]
+            this.getChapterData()
+            break;
         }
       }
     }
@@ -95,7 +116,8 @@ export default class Reader extends React.Component {
         uTab: ['hide'],
         navPannel: ['hide'],
         topNav: ['hide'],
-        botNav: ['hide']
+        botNav: ['hide'],
+        mulu: ['hide']
       },
       chapterData: null,
       colorCfg: {
@@ -125,16 +147,23 @@ export default class Reader extends React.Component {
       }
     }
 
-    var chapterInfo = JSON.parse(Data.instance.getItem(match.params.bookId)).chapters[0]
-    this.getChapterData(chapterInfo)
+    if (!Service.instance.modules.Reader) {
+      var chapters = JSON.parse(Data.instance.getItem(match.params.bookId)).chapters
+      Service.instance.modules.Reader = {
+        chapters: chapters,
+        curChapter: chapters[0]
+      }
+    }
+    this.getChapterData()
   }
 
-  getChapterData(chapterInfo) {
-    Service.instance.getContentByChapter(chapterInfo.link).then(data => {
+  getChapterData() {
+    Service.instance.getContentByChapter(Service.instance.modules.Reader.curChapter.link).then(data => {
       data.chapter.cpContent = data.chapter.cpContent.split(/\n/g)
       this.state.chapterData = data.chapter
       this.state.class.uTab = []
       this.setState(this.state)
+      document.body.scrollTop = 0
     })
   }
 
@@ -162,6 +191,16 @@ export default class Reader extends React.Component {
       }}></div>
     } else {
       return null
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.state.class.mulu.length === 0) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      if (document.body.style.overflow === 'hidden') {
+        document.body.style.overflow = 'auto'
+      }
     }
   }
 
@@ -302,54 +341,22 @@ export default class Reader extends React.Component {
       }
     }
 
-    function EventHanlder() {
-      // Dom.color_box.click(function () {
-      //   bgColor = $(this).data('color');
-      //   color = $(this).data('font')
-      //   Util.StorageSetter('bgColor', bgColor);
-      //   Util.StorageSetter('color', color);
-      //   $(this).addClass('color-box-current').siblings().removeClass('color-box-current');
-      //   $('body').css('background-color', bgColor);
-      //   if (color) {
-      //     Dom.read_content.css('color', color);
-      //   } else {
-      //     Dom.read_content.css('color', '#000');
-      //   }
-      //   if ($(this).attr('id') == 'font_night') {
-      //     $('.icon-night').addClass('icon-night-current');
-      //     $('.icon-night').next().html('白天');
-      //   } else {
-      //     $('.icon-night').removeClass('icon-night-current');
-      //     $('.icon-night').next().html('夜间');
-      //   }
-      // });
-      // $('#prev_chapter').click(function () {
-      //   readerModel.prevChapter(function (data) {
-      //     readerUI(data);
-      //   });
-      // });
-      // $('#next_chapter').click(function () {
-      //   readerModel.nextChapter(function (data) {
-      //     readerUI(data);
-      //   });
-      // });
-    }
-    main.call(this);
-    document.onscroll = () => {
 
-      // if (this.Dom.top_nav.style.display != 'none') {
-      //   this.Dom.top_nav.hide();
-      //   this.Dom.bottom_nav.hide();
-      //   this.Dom.icon_font.classList.remove('icon-font-current');
-      //   this.Dom.nav_pannel.hide();
-      // }
-    }
+    main.call(this);
+    // this.refs.mulu.addEventListener('touchmove', this.muluTouchMove);
+
+
+
   }
 
-  // componentDidUpdate(prevProps, prevState) { }
+  unmountComponent() {
+    // console.log('unmountComponent')
+    // this.refs.mulu.removeEventListener('touchmove', this.muluTouchMove);
+  }
+
 
   render() {
-    return <div style={{ background: this.state.colorCfg.list[this.state.colorCfg.defaultColor] }}>
+    return <div style={{ minHeight: '100vh', background: this.state.colorCfg.list[this.state.colorCfg.defaultColor] }}>
       {/* 顶部导航栏 */}
       <div className={N(['top-nav'].concat(this.state.class.topNav))}>
         <div className="top-nav-box">
@@ -363,8 +370,12 @@ export default class Reader extends React.Component {
       {/* 文本内容 */}
       {/* 章节切换 */}
       <ul className={N(['u-tab'].concat(this.state.class.uTab))}>
-        <Tappable data-option="prev" {...this.tappableProps}>上一章</Tappable>
-        <Tappable data-option="next" {...this.tappableProps}>下一章</Tappable>
+        <Tappable data-option="prev" {...this.tappableProps}>
+          <Button disabled={Service.instance.modules.Reader.curChapter.order === 1 ? true : false}>上一章</Button>
+        </Tappable>
+        <Tappable data-option="next" {...this.tappableProps}>
+          <Button disabled={Service.instance.modules.Reader.curChapter.order === Service.instance.modules.Reader.chapters.length ? true : false}>下一章</Button>
+        </Tappable>
       </ul>
       {/* 章节切换 */}
       <div className={N(['nav-pannel-bg', 'nav_pannel'].concat(this.state.class.navPannel))}></div>
@@ -384,12 +395,22 @@ export default class Reader extends React.Component {
           })}
         </div>
       </div>
+
+      <div ref="mulu" className={N(['mulu'].concat(this.state.class.mulu))}>
+        <div className="iscroll">
+          {
+            Service.instance.modules.Reader.chapters.map((item, i) => {
+              return <Tappable className={Service.instance.modules.Reader.curChapter.order === i + 1 ? 'active' : ''} key={item.id} data-index={i} data-option="muluitem" {...this.tappableProps}>{item.title}</Tappable>
+            })
+          }
+        </div>
+      </div>
       <div className={N(['bottom-nav'].concat(this.state.class.botNav))}>
         <div className="bottom-nav-box">
-          <div className="bottom-nav-item" id="menu_button">
+          <Tappable className="bottom-nav-item" id="menu_button" data-option="menubutton" {...this.tappableProps}>
             <div className="icon icon-menu"></div>
             <div className="icon-text">目录</div>
-          </div>
+          </Tappable>
           <Tappable className="bottom-nav-item" id="font_button" data-option="fontbutton" {...this.tappableProps}>
             <div className={N(['icon', 'icon-font'].concat(this.state.class.iconFont))}></div>
             <div className="icon-text">字体</div>
@@ -403,4 +424,7 @@ export default class Reader extends React.Component {
       <Tappable className="action-mid" data-option="actionmid" {...this.tappableProps}></Tappable>
     </div>;
   }
+
+
+
 }

@@ -1,7 +1,7 @@
 .header {
   position: fixed;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   width: 100%;
   height: 14vw;
@@ -44,15 +44,25 @@
 }
 
 .list {
+  position: relative;
   align-items: center;
   float: left;
   margin: 2vw 0;
   display: flex;
   width: 94%;
-  overflow: hidden;
   box-sizing: border-box;
   border-bottom: 1px solid #bbb;
 }
+
+.icon {
+  color: red;
+  top: 0;
+  right: 2vw;
+  position: absolute;
+  font-size: 6vw;
+}
+
+
 
 .table {
   display: flex;
@@ -72,7 +82,7 @@
   display: flex;
   width: 30vw;
   height: 42vw;
-  margin-bottom: 4vw;
+  margin: 4vw 0;
   flex-shrink: 0
 }
 
@@ -139,6 +149,7 @@
   position: relative;
   top: 14vw;
   display: flex;
+  overflow-x: hidden;
 }
 
 .scroll {
@@ -158,4 +169,39 @@
 
 .myCate {
   left: 100vw;
+}
+
+
+.kong {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  .kongImg {
+    width: 85vw;
+    height: 70vw;
+    background: url(src/img/a0146f25756b6fb4ddb7f8234cbb7fc3.png);
+    background-size: 100% 100%;
+    transform: translateY(0);
+    animation: float 4s infinite ease-in-out;
+  }
+  margin-top: 5vw;
+  font-size: 5vw;
+  line-height: 10vw;
+
+}
+
+@keyframes float {
+  50%{
+    transform: translateY(-7vw)
+  }
+  100%{
+    transform: translateY(0)
+  }
+}
+
+.cancelStar {
+  position: absolute;
+  right: 2vw;
+  top: 0;
 }
