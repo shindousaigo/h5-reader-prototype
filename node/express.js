@@ -8,11 +8,20 @@ module.exports = {
   setup: () => {
     var app = express()
     app.use(cors())
+    app.post('/', function (req, res, next) {
+      console.log(
+        req.query,
+        req.body
+      )
+
+    })
     app.get('/', function (req, res, next) {
-      var url = req.query.url
-      var qs = req.query.qs
+      // var url = req.query.url
+      // var qs = req.query.qs
 
-
+      console.log(
+        req.query
+      )
       var response = {
         "text": `You sent the message: "test". Now send me an attachment!`
       }
@@ -27,21 +36,22 @@ module.exports = {
       }
 
       // Send the HTTP request to the Messenger Platform
-      request({
-        "uri": "https://graph.facebook.com/v2.6/me/messages",
-        "qs": {
-          "access_token": PAGE_ACCESS_TOKEN
-        },
-        "method": "POST",
-        "json": request_body
-      }, (err, res, body) => {
-        if (!err) {
-          console.log('message sent!')
-          // console.log(res, body)
-        } else {
-          console.error("Unable to send message:" + err);
-        }
-      });
+
+      // request({
+      //   "uri": "https://graph.facebook.com/v2.6/me/messages",
+      //   "qs": {
+      //     "access_token": PAGE_ACCESS_TOKEN
+      //   },
+      //   "method": "POST",
+      //   "json": request_body
+      // }, (err, res, body) => {
+      //   if (!err) {
+      //     console.log('message sent!')
+      //     // console.log(res, body)
+      //   } else {
+      //     console.error("Unable to send message:" + err);
+      //   }
+      // });
 
 
       // if (url) {
