@@ -68,7 +68,7 @@ module.exports = {
 
   module: {
     rules: [
-      // common.standardPreLoader,
+      common.scssLoader,
       common.jsLoader,
       common.fileLoader,
       common.urlLoader,

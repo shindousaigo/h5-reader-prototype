@@ -9,17 +9,29 @@ export default class Loader extends React.Component {
     super(props)
 
     this.state = {
-      isShow: false
+      isShow: false,
+      loadCount: 0,
     }
 
-    Service.instance.modules['Loader'] = this
+    Service.instance.modules.Loader = this
   }
 
   render() {
+
+
     return <div className={
       N(['Loader-loading'].concat(this.state.isShow ? ['show'] : ['hide']))
     }>
-
+      <div type="cover"></div>
+      <div type="loading">
+        <div className="loading">
+          <i></i>
+          <i></i>
+          <i></i>
+        </div>
+      </div>
     </div>
+
+
   }
 }
